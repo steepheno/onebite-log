@@ -37,6 +37,30 @@ export default function PostEditorModal() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 입력한 내용에 따라 높이가 늘어나도록 하는 useEffect
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // 높이 초기화
+      textareaRef.current.style.height =
+        textareaRef.current.scrollHeight + "px";
+    }
+  }, [content]);
+
+  // 모달을 열었을 때 바로 포커스되도록 하는 useEffect
+  useEffect(() => {
+    if (!isOpen) {
+      images.forEach((image) => {
+        URL.revokeObjectURL(image.previewUrl); // 브라우저 메모리 누수 방지 코드
+      });
+      return;
+    }
+
+    textareaRef.current?.focus();
+    setContent(""); // 모달 닫으면 입력했던 내용 초기화
+    setImages([]);
+  }, [isOpen]);
+
+  /* 포스트 작성 모달 닫기 */
   const handleCloseModal = () => {
     if (content !== "" || images.length !== 0) {
       openAlertModal({
@@ -51,6 +75,7 @@ export default function PostEditorModal() {
     close();
   };
 
+  /* 포스트 생성 */
   const handleCreatePostClick = () => {
     if (content.trim() === "") return;
     createPost({
@@ -60,6 +85,7 @@ export default function PostEditorModal() {
     });
   };
 
+  /* 포스트할 이미지 선택 */
   const handleSelectImages = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
@@ -76,28 +102,13 @@ export default function PostEditorModal() {
     e.target.value = "";
   };
 
+  /* 포스트에서 선택한 이미지 삭제 */
   const handleDeleteImage = (image: Image) => {
     setImages((prevImages) =>
       prevImages.filter((item) => item.previewUrl !== image.previewUrl),
     );
+    URL.revokeObjectURL(image.previewUrl); // 브라우저 메모리 누수 방지 코드
   };
-
-  // 입력한 내용에 따라 높이가 늘어나도록 하는 useEffect
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto"; // 높이 초기화
-      textareaRef.current.style.height =
-        textareaRef.current.scrollHeight + "px";
-    }
-  }, [content]);
-
-  // 모달을 열었을 때 바로 포커스되도록 하는 useEffect
-  useEffect(() => {
-    if (!isOpen) return;
-    textareaRef.current?.focus();
-    setContent(""); // 모달 닫으면 입력했던 내용 초기화
-    setImages([]);
-  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCloseModal}>
