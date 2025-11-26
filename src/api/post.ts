@@ -38,12 +38,12 @@ export async function createPostWithImages({
   images: File[];
   userId: string;
 }) {
-  // 1. 새로운 포스트 생성
+  // 1) 새로운 포스트 생성
   const post = await createPost(content);
   if (images.length === 0) return post;
 
   try {
-    // 2. 이미지 업로드
+    // 2) 이미지 업로드
     const imageUrls = await Promise.all(
       images.map((image) => {
         const fileExtension = image.name.split(".").pop() || "webp";
@@ -57,7 +57,7 @@ export async function createPostWithImages({
       }),
     );
 
-    // 3. 포스트 테이블 업데이트
+    // 3) 포스트 테이블 업데이트
     const updatedPost = await updatePost({
       id: post.id,
       image_urls: imageUrls,
