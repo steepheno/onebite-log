@@ -2,6 +2,17 @@ import supabase from "@/lib/supabase";
 import { uploadImage } from "./image";
 import type { PostEntity } from "@/types";
 
+/* 포스트 조회 */
+export async function fetchPosts() {
+  const { data, error } = await supabase
+    .from("post")
+    .select("*, author: profile!author_id (*)")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data;
+}
+
 /* 포스트 생성 */
 export async function createPost(content: string) {
   const { data, error } = await supabase
@@ -52,8 +63,7 @@ export async function createPostWithImages({
     });
 
     return updatedPost;
-  }
-  catch (error) {
+  } catch (error) {
     await deletePost(post.id);
   }
 }
