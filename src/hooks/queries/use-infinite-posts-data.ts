@@ -5,7 +5,6 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 const PAGE_SIZE = 5;
 
 export function useInfinitePostsData() {
-
   const queryClient = useQueryClient();
 
   return useInfiniteQuery({
@@ -17,8 +16,8 @@ export function useInfinitePostsData() {
       const posts = await fetchPosts({ from, to });
       // 캐시 정규화
       posts.forEach((post) => {
-        queryClient.setQueryData(QUERY_KEYS.post.byId(post.id), post)
-      })
+        queryClient.setQueryData(QUERY_KEYS.post.byId(post.id), post);
+      });
       return posts.map((post) => post.id);
     },
 
@@ -27,5 +26,9 @@ export function useInfinitePostsData() {
       if (lastPage.length < PAGE_SIZE) return undefined;
       return allPages.length;
     },
+
+    /* 무한 스크롤 캐시 최적화 */
+    // 무한 스크롤로 불러온 데이터는 자동으로 refetching 되지 않도록 설정
+    staleTime: Infinity,
   });
 }
