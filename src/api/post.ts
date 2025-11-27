@@ -14,6 +14,18 @@ export async function fetchPosts({ from, to }: { from: number; to: number }) {
   return data;
 }
 
+/* 캐시 데이터 정규화 */
+export async function fetchPostById(postId: number) {
+  const { data, error } = await supabase
+    .from("post")
+    .select("*, author: profile!author_id (*)")
+    .eq("id", postId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 /* 포스트 생성 */
 export async function createPost(content: string) {
   const { data, error } = await supabase
